@@ -2,7 +2,7 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     1.0
+ * @version     1.0.1
  * @copyright   Copyright (C) 2014 Jean-Baptiste Alleaume. Tous droits réservés.
  * @license     http://alleau.me/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
@@ -963,23 +963,26 @@ class BlockEtdTopMenu extends Module {
 
 	public function hookDisplayTop() {
 
-		require_once(dirname(__FILE__)."/lib/includes.php");
+        if (!$this->isCached('blocketdtopmenu.tpl', $this->getCacheId())) {
 
-		$defaults = array(
-			'startLevel' => 0,
-			'endLevel' => 0,
-			'showAllChildren' => 1,
-			'theme' => 'etdprestashop'
-		);
+            require_once(dirname(__FILE__)."/lib/includes.php");
 
-		$rnm = new RokNavMenu($defaults);
-		$rnm->initialize();
+            $defaults = array(
+                'startLevel' => 0,
+                'endLevel' => 0,
+                'showAllChildren' => 1,
+                'theme' => 'etdprestashop'
+            );
 
-		$this->smarty->assign('menu', $rnm);
-		//$this->context->controller->addJS($this->_path.'js/blocketdtopmenu.min.js');
+            $rnm = new RokNavMenu($defaults);
+            $rnm->initialize();
 
-		$html = $this->display(__FILE__, 'blocketdtopmenu.tpl', $this->getCacheId());
-		return $html;
+            $this->smarty->assign('menu', $rnm);
+
+        }
+
+        $html = $this->display(__FILE__, 'blocketdtopmenu.tpl', $this->getCacheId());
+        return $html;
 
 	}
 

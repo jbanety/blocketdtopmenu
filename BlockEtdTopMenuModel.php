@@ -2,7 +2,7 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     1.0
+ * @version     1.0.1
  * @copyright   Copyright (C) 2014 Jean-Baptiste Alleaume. Tous droits réservés.
  * @license     http://alleau.me/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
@@ -17,7 +17,8 @@ class BlockEtdTopMenuModel extends ObjectModel {
 	protected static $_location_id;
 
 	static function getLinks($include_root=false,$published=false,$id_lang=false, $id_shop=false) {
-	
+
+        $context = Context::getContext();
 		$cache = Cache::getInstance();
 		
 		$key = 'blocketdtopmenumodel_getLinks';
@@ -27,13 +28,14 @@ class BlockEtdTopMenuModel extends ObjectModel {
 			$key .= '_published';
 		if ($id_lang)
 			$key .= '_' . $id_lang;
+        else
+            $key .= '_' . $context->language->id;
 		if ($id_shop)
 			$key .= '_' . $id_shop;
 			
 		//$key = md5($key);
 
 		if (!$cache->exists($key)) {
-			$context = Context::getContext();
 			$links = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
 				SELECT a.*, b.title, c.published
 				FROM ' . _DB_PREFIX_ . 'etd_topmenu AS a

@@ -1,7 +1,7 @@
 /**
 * @package     blocketdtopmenu
 *
-* @version     1.0
+* @version     1.0.1
 * @copyright   Copyright (C) 2014 Jean-Baptiste Alleaume. Tous droits réservés.
 * @license     http://alleau.me/LICENSE
 * @author      Jean-Baptiste Alleaume http://alleau.me
