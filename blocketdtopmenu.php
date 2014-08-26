@@ -932,8 +932,12 @@ class BlockEtdTopMenu extends Module {
 					$cat = new CMSCategory($id_cms_category, $this->context->language->id);
 					$html .= '<optgroup label="' . $cat->name . '">';
 					foreach($pages as $page) {
+                        $selected = false;
+                        if ($link && $link['type'] == 'cms' && $link['params']->id_cms == $page['id_cms']) {
+                            $selected = true;
+                        }
 						$cms = new CMSCore($page['id_cms'], $this->context->language->id);
-						$html .= '<option value="' . $cms->id . '">' . $cms->meta_title . '</option>';
+						$html .= '<option value="' . $cms->id . '"' . ( $selected ? ' selected="selected"' : '') . '>' . $cms->meta_title . '</option>';
 					}
 					$html .= '</optgroup>';
 				}
