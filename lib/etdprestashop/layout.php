@@ -80,7 +80,7 @@ class EtdPrestashopLayout extends AbstractRokMenuLayout
 		$column_widths = explode(",",$item->getColumnWidths());
 
 		if (trim($columns)=='') $columns = 1;
-		if ($dropdown_width == 0) $dropdown_width = 180;
+		//if ($dropdown_width == 0) $dropdown_width = 180;
 
 		$wrapper_css = ' style="width:'.$dropdown_width.'px;"';
 
