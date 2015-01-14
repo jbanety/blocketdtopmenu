@@ -2,8 +2,8 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     1.0.1
- * @copyright   Copyright (C) 2014 Jean-Baptiste Alleaume. Tous droits réservés.
+ * @version     1.6
+ * @copyright   Copyright (C) 2015 Jean-Baptiste Alleaume. Tous droits réservés.
  * @license     http://alleau.me/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
  */
@@ -19,13 +19,17 @@ class BlockEtdTopMenu extends Module {
 
 		$this->name = 'blocketdtopmenu';
 		$this->tab = 'front_office_features';
-		$this->version = '1.0';
+		$this->version = '1.6';
 		$this->author = 'ETD Solutions';
 
+		$this->bootstrap = true;
 		parent::__construct();
 
 		$this->displayName = $this->l('ETD Top Menu');
 		$this->description = $this->l('Add an enhanced horizontal menu to the top of your e-commerce website.');
+		$this->secure_key = Tools::encrypt($this->name);
+		$this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+
 	}
 
 	public function install() {
@@ -73,22 +77,12 @@ class BlockEtdTopMenu extends Module {
 
 		switch ($this->_display) {
 			case 'add':
-				$this->toolbar_btn['save'] = array(
-					'id' => 'saveLink',
-					'href' => '#',
-					'desc' => $this->l('Save')
-				);
 				$this->toolbar_btn['cancel'] = array(
 					'href' => $back,
 					'desc' => $this->l('Cancel')
 				);
 				break;
 			case 'edit':
-				$this->toolbar_btn['save'] = array(
-					'id' => 'saveLink',
-					'href' => '#',
-					'desc' => $this->l('Save')
-				);
 				$this->toolbar_btn['cancel'] = array(
 					'href' => $back,
 					'desc' => $this->l('Cancel')
@@ -101,7 +95,8 @@ class BlockEtdTopMenu extends Module {
 				);
 				$this->toolbar_btn['refresh-cache'] = array(
 					'href' => $current_index.'&amp;configure='.$this->name.'&amp;token='.$token.'&amp;rebuildMenu',
-					'desc' => $this->l('Rebuild menu')
+					'desc' => $this->l('Rebuild menu'),
+					'class' => 'icon-refresh'
 				);
 			break;
 			default:
@@ -116,6 +111,9 @@ class BlockEtdTopMenu extends Module {
 		$this->context->controller->addJqueryPlugin('tablednd');
 		$this->context->controller->addJS(_PS_JS_DIR_.'admin-dnd.js');
 
+		$current_index = AdminController::$currentIndex;
+		$token = Tools::getAdminTokenLite('AdminModules');
+
 		$this->_display = 'index';
 
 		$links = BlockEtdTopMenuModel::getLinks();
@@ -128,30 +126,34 @@ class BlockEtdTopMenu extends Module {
 		$this->fields_form[0]['form'] = array(
 			'legend' => array(
 				'title' => $this->l('Menu links'),
-				'image' => _PS_ADMIN_IMG_.'information.png'
+				'icon' => 'icon-list-alt'
 			),
 			'input' => array(
 				array(
 					'type' => 'links',
 					'label' => $this->l('Links:'),
-					'name' => 'links[]',
+					'name' => 'links',
 					'values' => $links,
 					'desc' => $this->l(''),
 					'ordering' => $ordering
 				)
-			)/*,
-			'submit' => array(
-				'name' => 'submitLinks',
-				'title' => $this->l('Save   '),
-				'class' => 'button'
-			)*/
+			),
+			'buttons' => array(
+				'newLink' => array(
+					'title' => $this->l('Add new'),
+					'href' => $current_index.'&amp;configure='.$this->name.'&amp;token='.$token.'&amp;addLink',
+					'class' => 'pull-right',
+					'icon' => 'process-icon-new'
+				)
+			)
 		);
 
 		$helper = $this->initForm();
 		$helper->submit_action = '';
 		$helper->title = $this->l('Top Menu Links');
 
-		$helper->fields_value = $this->fields_value;
+		if (isset($this->fields_value))
+			$helper->fields_value = $this->fields_value;
 		$this->_html .= $helper->generateForm($this->fields_form);
 
 		return;
@@ -159,13 +161,15 @@ class BlockEtdTopMenu extends Module {
 
 	protected function displayAddForm() {
 
+		$this->_display = 'add';
+		$link = null;
+		$id_link = 0;
+
 		if (Tools::isSubmit('editLink') && Tools::getValue('id_link')) {
 			$this->_display = 'edit';
 			$id_link = (int)Tools::getValue('id_link');
 			$link = BlockEtdTopMenuModel::getLink($id_link);
 		}
-		else
-			$this->_display = 'add';
 
 
 		$modules = Module::getModulesInstalled(false);
@@ -180,13 +184,9 @@ class BlockEtdTopMenu extends Module {
 		$this->fields_form[0]['form'] = array(
 			'legend' => array(
 				'title' => $this->l('Details'),
-				'image' => _PS_ADMIN_IMG_.'information.png'
+				'icon' => isset($custom) ? 'icon-edit' : 'icon-plus-square'
 			),
 			'input' => array(
-				array(
-					'type' => 'hidden',
-					'name' => 'submitLink'
-				),
 				array(
 					'type' => 'hidden',
 					'name' => 'id_link'
@@ -267,22 +267,21 @@ class BlockEtdTopMenu extends Module {
 					'size' => 40
 				),*/
 				array(
-					'type' => 'radio',
+					'type' => 'switch',
 					'label' => $this->l('Published:'),
 					'name' => 'published',
 					'desc' => $this->l(''),
 					'is_bool' => true,
-					'class' => 't',
 					'values' => array(
 						array(
 							'id' => 'published_on',
 							'value' => 1,
-							'label' => 'Yes'
+							'label' => $this->l('Yes')
 						),
 						array(
 							'id' => 'published_off',
 							'value' => 0,
-							'label' => 'No'
+							'label' => $this->l('No')
 						)
 					)
 				),
@@ -431,22 +430,21 @@ class BlockEtdTopMenu extends Module {
 					'maxlength' => 15
 				),
 				array(
-					'type' => 'radio',
+					'type' => 'switch',
 					'label' => $this->l('Group Child Items:'),
 					'name' => 'children_group',
 					'desc' => $this->l('Select this to group children under menu item rather than treating as a submenu'),
 					'is_bool' => true,
-					'class' => 't',
 					'values' => array(
 						array(
 							'id' => 'group_on',
 							'value' => 1,
-							'label' => 'Yes'
+							'label' => $this->l('Yes')
 						),
 						array(
 							'id' => 'group_off',
 							'value' => 0,
-							'label' => 'No'
+							'label' => $this->l('No')
 						)
 					)
 				),
@@ -498,6 +496,10 @@ class BlockEtdTopMenu extends Module {
 					'required' => true,
 					'desc' => $this->l('')
 				)
+			),
+			'submit' => array(
+				'name' => 'submitLink',
+				'title' => $this->l('Save'),
 			)
 		);
 
@@ -830,10 +832,10 @@ class BlockEtdTopMenu extends Module {
 			$link = BlockEtdTopMenuModel::getLink($id_link);
 		}
 
-		$html = '
-			<br><fieldset id="fieldset_1">
-			<legend>
-				<img src="/img/admin/information.png">';
+		$html = '<div class="form-group">';
+
+		$label = '';
+		$input = '';
 
 		switch($type) {
 
@@ -846,80 +848,54 @@ class BlockEtdTopMenu extends Module {
 				break;
 
 			case 'page':
-				$html .= $this->l('Page') . '</legend>';
-				$html .= '
-					<label>' . $this->l('Page:') . ' </label>
-					<div class="margin-form">
-						<select name="params[id_meta]" id="id_meta">
-							<option value="">--</option>';
-
-					$metas = MetaCore::getMetas();
-					foreach ($metas as $meta) {
-						$selected = false;
-						if ($link && $link['type'] == 'page' && $link['params']->id_meta == $meta['id_meta']) {
-							$selected = true;
-						}
-						$html .= '<option value="'.$meta['id_meta'].'"' . ( $selected ? 'selected="selected"' : '') . '>'.$meta['page'].'</option>';
+				$label = $this->l('Page:');
+				$input = '<select name="params[id_meta]" id="id_meta"><option value="">--</option>';
+				$metas = Meta::getMetas();
+				foreach ($metas as $meta) {
+					$selected = false;
+					if ($link && $link['type'] == 'page' && $link['params']->id_meta == $meta['id_meta']) {
+						$selected = true;
 					}
-
-				$html .= '</select>
-						<sup>*</sup>
-					</div>
-				';
+					$input .= '<option value="'.$meta['id_meta'].'"' . ( $selected ? 'selected="selected"' : '') . '>'.$meta['page'].'</option>';
+				}
+				$input .= '</select>';
 			break;
 
 			case 'pcategory':
-				$html .= $this->l('Product Category') . '</legend>';
-				$html .= '
-					<label>' . $this->l('Category:') . ' </label>
-					<div class="margin-form">
-						<select name="params[id_category]" id="id_category">
-							<option value="">--</option>';
+				$label = $this->l('Category:');
+				$input = '<select name="params[id_category]" id="id_category"><option value="">--</option>';
 
-				$cats = CategoryCore::getCategories(false, false, false, 'AND level_depth > 0', 'ORDER BY c.nleft ASC');
+				$cats = Category::getCategories(false, false, false, 'AND level_depth > 0', 'ORDER BY c.nleft ASC');
 
 				foreach ($cats as $cat) {
 					$selected = false;
 					if ($link && $link['type'] == 'pcategory' && $link['params']->id_category == $cat['id_category']) {
 						$selected = true;
 					}
-					$html .= '<option value="'.$cat['id_category'].'"' . ( $selected ? 'selected="selected"' : '') . '>'. str_repeat('-&nbsp;', $cat['level_depth']-1) . $cat['name'].'</option>';
+					$input .= '<option value="'.$cat['id_category'].'"' . ( $selected ? 'selected="selected"' : '') . '>'. str_repeat('-&nbsp;', $cat['level_depth']-1) . $cat['name'].'</option>';
 				}
 
-				$html .= '</select>
-						<sup>*</sup>
-					</div>
-				';
+				$input .= '</select>';
 			break;
 
 			case 'ccategory':
-				$html .= $this->l('CMS Category') . '</legend>';
-				$html .= '
-					<label>' . $this->l('Category:') . ' </label>
-					<div class="margin-form">
-						<select name="params[id_cms_category]" id="id_cms_category">
-							<option value="">--</option>';
+				$label = $this->l('Category:');
+				$input = '<select name="params[id_cms_category]" id="id_cms_category"><option value="">--</option>';
 
 				$id_cms_category = isset($link['params']->id_cms_category) ? $link['params']->id_cms_category : 0;
 				$categories = CMSCategory::getCategories($context->language->id, false);
 				$html_categories = CMSCategoryCore::recurseCMSCategory($categories, $categories[0][1], 1, $id_cms_category, 1);
-				$html .= str_replace('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', '-&nbsp;', $html_categories);
+				$input .= str_replace('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', '-&nbsp;', $html_categories);
 
-				$html .= '</select>
-						<sup>*</sup>
-					</div>
-				';
+				$input .= '</select>';
 				break;
 
 			case 'cms':
-				$html .= $this->l('CMS Page') . '</legend>';
-				$html .= '
-					<label>' . $this->l('Page:') . ' </label>
-					<div class="margin-form">
-						<select name="params[id_cms]" id="id_cms">
-							<option value="">--</option>';
 
-				$pages = CMSCore::getCMSPages();
+				$label = $this->l('Page:');
+				$input = '<select name="params[id_cms]" id="id_cms"><option value="">--</option>';
+
+				$pages = CMS::getCMSPages();
 				$ordered = array();
 
 				if (count($pages)) {
@@ -930,22 +906,19 @@ class BlockEtdTopMenu extends Module {
 
 				foreach($ordered as $id_cms_category => $pages) {
 					$cat = new CMSCategory($id_cms_category, $this->context->language->id);
-					$html .= '<optgroup label="' . $cat->name . '">';
+					$input .= '<optgroup label="' . $cat->name . '">';
 					foreach($pages as $page) {
                         $selected = false;
                         if ($link && $link['type'] == 'cms' && $link['params']->id_cms == $page['id_cms']) {
                             $selected = true;
                         }
 						$cms = new CMSCore($page['id_cms'], $this->context->language->id);
-						$html .= '<option value="' . $cms->id . '"' . ( $selected ? ' selected="selected"' : '') . '>' . $cms->meta_title . '</option>';
+						$input .= '<option value="' . $cms->id . '"' . ( $selected ? ' selected="selected"' : '') . '>' . $cms->meta_title . '</option>';
 					}
-					$html .= '</optgroup>';
+					$input .= '</optgroup>';
 				}
 
-				$html .= '</select>
-						<sup>*</sup>
-					</div>
-				';
+				$input .= '</select>';
 				break;
 
 			default:
@@ -953,7 +926,21 @@ class BlockEtdTopMenu extends Module {
 			break;
 		}
 
-		$html .= '</fieldset>';
+		if (!empty($label)) {
+			$html .= '<label class="control-label col-lg-3 required">' . $label . '</label>';
+		}
+
+		if (!empty($input)) {
+			if (!empty($label)) {
+				$html .= '<div class="col-lg-9">';
+			}
+			$html .= $input;
+			if (!empty($label)) {
+				$html .= '</div>';
+			}
+		}
+
+		$html .= '</div>';
 
 		$result = array(
 			'hasError' => false,
@@ -967,26 +954,48 @@ class BlockEtdTopMenu extends Module {
 
 	public function hookDisplayTop() {
 
-        if (!$this->isCached('blocketdtopmenu.tpl', $this->getCacheId())) {
+		$this->smarty->assign('position', 'top');
 
-            require_once(dirname(__FILE__)."/lib/includes.php");
+        return $this->renderMenu();
 
-            $defaults = array(
-                'startLevel' => 0,
-                'endLevel' => 0,
-                'showAllChildren' => 1,
-                'theme' => 'etdprestashop'
-            );
+	}
 
-            $rnm = new RokNavMenu($defaults);
-            $rnm->initialize();
+	public function hookDisplayLeftColumn() {
 
-            $this->smarty->assign('menu', $rnm);
+		$this->smarty->assign('position', 'leftcol');
 
-        }
+		return $this->renderMenu();
+	}
 
-        $html = $this->display(__FILE__, 'blocketdtopmenu.tpl', $this->getCacheId());
-        return $html;
+	public function hookDisplayRightColumn() {
+
+		$this->smarty->assign('position', 'rightcol');
+
+		return $this->renderMenu();
+	}
+
+	protected function renderMenu() {
+
+		if (!$this->isCached('blocketdtopmenu.tpl', $this->getCacheId())) {
+
+			require_once(dirname(__FILE__)."/lib/includes.php");
+
+			$defaults = array(
+				'startLevel' => 0,
+				'endLevel' => 0,
+				'showAllChildren' => 1,
+				'theme' => 'etdprestashop'
+			);
+
+			$rnm = new RokNavMenu($defaults);
+			$rnm->initialize();
+
+			$this->smarty->assign('menu', $rnm);
+
+		}
+
+		$html = $this->display(__FILE__, 'blocketdtopmenu.tpl', $this->getCacheId());
+		return $html;
 
 	}
 
