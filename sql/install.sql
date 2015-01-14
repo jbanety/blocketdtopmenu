@@ -1,28 +1,54 @@
-CREATE TABLE `#__etd_topmenu` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) NOT NULL COMMENT 'The display title of the menu item.',
-  `path` varchar(1024) NOT NULL COMMENT 'The computed path of the menu item based on the alias field.',
-  `link` varchar(1024) NOT NULL COMMENT 'The actually link the menu item refers to.',
+CREATE TABLE IF NOT EXISTS `#__etd_topmenu` (
+  `id` int(11) NOT NULL,
   `type` varchar(16) NOT NULL COMMENT 'The type of link: Component, URL, Alias, Separator',
-  `published` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'The published state of the menu link.',
   `parent_id` int(10) unsigned NOT NULL DEFAULT '1' COMMENT 'The parent menu item in the menu tree.',
   `level` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'The relative level in the tree.',
-  `id_shop` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'FK to #__shop.id',
-  `ordering` int(11) NOT NULL DEFAULT '0' COMMENT 'The relative ordering of the menu item in the tree.',
   `browserNav` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'The click behaviour of the link.',
   `access` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'The access level required to view the menu item.',
-  `img` varchar(255) NOT NULL COMMENT 'The image of the menu item.',
+  `columns` tinyint(4) NOT NULL DEFAULT '1',
+  `distribution` enum('even','inorder','manual') NOT NULL DEFAULT 'even',
+  `manual_distribution` varchar(15) NOT NULL,
+  `width` varchar(4) NOT NULL,
+  `column_widths` varchar(15) NOT NULL,
+  `children_group` tinyint(1) unsigned NOT NULL,
+  `children_type` enum('menuitems','modules','modulehooks') NOT NULL DEFAULT 'menuitems',
+  `modules` int(10) unsigned NOT NULL,
+  `module_hooks` int(10) unsigned NOT NULL,
+  `css` varchar(255) NOT NULL COMMENT 'CSS Class',
   `params` text NOT NULL COMMENT 'JSON encoded data for the menu item.',
   `lft` int(11) NOT NULL DEFAULT '0' COMMENT 'Nested set lft.',
-  `rgt` int(11) NOT NULL DEFAULT '0' COMMENT 'Nested set rgt.',
-  `home` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Indicates if this menu item is the home or default page.',
-  `id_lang` int(10) NOT NULL DEFAULT '0' COMMENT 'FK to #__lang.id',
-  PRIMARY KEY (`id`),
-  KEY `idx_idshop` (`id_shop`,`published`,`access`),
-  KEY `idx_left_right` (`lft`,`rgt`),
-  KEY `idx_path` (`path`(255)),
-  KEY `idx_lang` (`id_lang`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
+  `rgt` int(11) NOT NULL DEFAULT '0' COMMENT 'Nested set rgt.'
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=59 ;
 
-INSERT INTO  `#__etd_topmenu` ( `id`, `title`, `path` ,`link` ,`type` ,`published` ,`parent_id` ,`level` ,`id_shop` ,`ordering` ,`browserNav` ,`access` ,`img` ,`params` ,`lft` ,`rgt` ,`home` ,`id_lang` )
-VALUES ( '1',  'root',  '',  '',  '',  '1',  '0',  '0',  '0',  '0',  '0',  '0',  '',  '',  '0',  '1',  '0',  '0' )
+INSERT INTO `#__etd_topmenu` (`id`, `type`, `parent_id`, `level`, `browserNav`, `access`, `columns`, `distribution`, `manual_distribution`, `width`, `column_widths`, `children_group`, `children_type`, `modules`, `module_hooks`, `css`, `params`, `lft`, `rgt`) VALUES
+  (1, 'root', 0, 0, 0, 0, 1, 'even', '', '0', '', 0, 'menuitems', 0, 0, '', '', 0, 2);
+
+CREATE TABLE IF NOT EXISTS `#__etd_topmenu_lang` (
+  `id_link` int(10) NOT NULL,
+  `id_lang` int(10) NOT NULL,
+  `title` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `#__etd_topmenu_lang` (`id_link`, `id_lang`, `title`) VALUES
+(1, 1, 'Racine');
+
+CREATE TABLE IF NOT EXISTS `#__etd_topmenu_shop` (
+  `id_link` int(10) NOT NULL,
+  `id_shop` int(10) NOT NULL,
+  `published` tinyint(4) unsigned NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `#__etd_topmenu_shop` (`id_link`, `id_shop`, `published`) VALUES
+(1, 1, 1);
+
+ALTER TABLE `#__etd_topmenu`
+ ADD PRIMARY KEY (`id`), ADD KEY `idx_idshop` (`access`), ADD KEY `idx_left_right` (`lft`,`rgt`);
+
+ALTER TABLE `#__etd_topmenu_lang`
+ ADD PRIMARY KEY (`id_link`,`id_lang`), ADD KEY `id_lang` (`id_lang`);
+
+ALTER TABLE `#__etd_topmenu_shop`
+ ADD PRIMARY KEY (`id_link`,`id_shop`), ADD KEY `published` (`published`), ADD KEY `shop_published` (`id_shop`,`published`);
+
+ALTER TABLE `#__etd_topmenu`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
