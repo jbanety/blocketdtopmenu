@@ -76,7 +76,7 @@ class EtdPrestashopLayout extends AbstractRokMenuLayout
 		if ($custom_icon && $custom_icon != -1) $item->addLinkClass('icon');*/
 		if ($custom_class != '') $item->addListItemClass($custom_class);
 
-		$dropdown_width = $item->getWidth();
+		$dropdown_width = (int) $item->getWidth();
 		$column_widths = explode(",",$item->getColumnWidths());
 
 		if (trim($columns)=='') $columns = 1;
@@ -100,8 +100,12 @@ class EtdPrestashopLayout extends AbstractRokMenuLayout
 			}
 		} else {
 			for ($i=0; $i < $columns; $i++) {
-				$col_width = floor(intval($dropdown_width)/$columns);
-				$ul_css[] = ' style="width:'.$col_width.'px;"';
+				if ($dropdown_width > 0) {
+					$col_width = floor(intval($dropdown_width)/$columns);
+					$ul_css[] = ' style="width:'.$col_width.'px;"';
+				} else {
+					$ul_css[] = '';
+				}
 			}
 		}
 
