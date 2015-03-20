@@ -352,7 +352,7 @@ class BlockEtdTopMenu extends Module {
 					'size' => 40,
 					'maxlength' => 255
 				),
-				array(
+				/*array(
 					'type' => 'select',
 					'label' => $this->l('Columns of Child Items:'),
 					'name' => 'columns',
@@ -412,7 +412,7 @@ class BlockEtdTopMenu extends Module {
 					'desc' => $this->l('Comma separated count of rows in each column, eg: 4,2,3'),
 					'size' => 30,
 					'maxlength' => 15
-				),
+				),*/
 				array(
 					'type' => 'text',
 					'label' => $this->l('Drop-Down Width (px):'),
@@ -420,7 +420,7 @@ class BlockEtdTopMenu extends Module {
 					'desc' => $this->l('Width of any dropdown column in px, eg: 400'),
 					'size' => 10,
 					'maxlength' => 4
-				),
+				),/*
 				array(
 					'type' => 'text',
 					'label' => $this->l('Column Widths (px):'),
@@ -495,7 +495,7 @@ class BlockEtdTopMenu extends Module {
 					),
 					'required' => true,
 					'desc' => $this->l('')
-				)
+				)*/
 			),
 			'submit' => array(
 				'name' => 'submitLink',

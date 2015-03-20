@@ -682,15 +682,69 @@ class BlockEtdTopMenuModel extends ObjectModel {
 		return $data;
 	}
 
-    protected static function cleanCache() {
+    protected static function cleanCache($template, $cache_id = null, $compile_id = null) {
 
         // On vide le cache Prestashop.
         $cache = Cache::getInstance();
         $cache->delete("blocketdtopmenumodel_*");
 
         // On vide le cache smarty.
-        Tools::clearSmartyCache();
+        //Tools::clearSmartyCache();
+
+		if (Configuration::get('PS_SMARTY_CLEAR_CACHE') == 'never')
+			return 0;
+
+		if ($cache_id === null)
+			$cache_id = 'blocketdtopmenu';
+
+		Tools::enableCache();
+		$number_of_template_cleared = Tools::clearCache(Context::getContext()->smarty, self::getTemplatePath($template), $cache_id, $compile_id);
+		Tools::restoreCacheSettings();
+
+		return $number_of_template_cleared;
 
     }
+
+	/**
+	 * Get realpath of a template of current module (check if template is overriden too)
+	 *
+	 * @since 1.5.0
+	 * @param string $template
+	 * @return string
+	 */
+	protected static function getTemplatePath($template)
+	{
+		$overloaded = self::_isTemplateOverloadedStatic($template);
+		if ($overloaded === null)
+			return null;
+
+		if ($overloaded)
+			return $overloaded;
+		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/hook/'.$template))
+			return _PS_MODULE_DIR_.'blocketdtopmenu/views/templates/hook/'.$template;
+		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/front/'.$template))
+			return _PS_MODULE_DIR_.'blocketdtopmenu/views/templates/front/'.$template;
+		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/'.$template))
+			return _PS_MODULE_DIR_.'blocketdtopmenu/'.$template;
+		else
+			return null;
+	}
+
+	protected static function _isTemplateOverloadedStatic($template)
+	{
+		if (Tools::file_exists_cache(_PS_THEME_DIR_.'modules/blocketdtopmenu/'.$template))
+			return _PS_THEME_DIR_.'modules/blocketdtopmenu/'.$template;
+		elseif (Tools::file_exists_cache(_PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/hook/'.$template))
+			return _PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/hook/'.$template;
+		elseif (Tools::file_exists_cache(_PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/front/'.$template))
+			return _PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/front/'.$template;
+		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/hook/'.$template))
+			return false;
+		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/front/'.$template))
+			return false;
+		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/'.$template))
+			return false;
+		return null;
+	}
 
 }
