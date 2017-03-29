@@ -2,9 +2,9 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     1.6
- * @copyright   Copyright (C) 2015 Jean-Baptiste Alleaume. Tous droits réservés.
- * @license     http://alleau.me/LICENSE
+ * @version     2.0
+ * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
+ * @license     https://raw.githubusercontent.com/jbanety/blocketdtopmenu/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
  */
 
@@ -19,7 +19,7 @@ class BlockEtdTopMenu extends Module {
 
 		$this->name = 'blocketdtopmenu';
 		$this->tab = 'front_office_features';
-		$this->version = '1.6';
+		$this->version = '2.0';
 		$this->author = 'ETD Solutions';
 
 		$this->bootstrap = true;
@@ -352,67 +352,6 @@ class BlockEtdTopMenu extends Module {
 					'size' => 40,
 					'maxlength' => 255
 				),
-				/*array(
-					'type' => 'select',
-					'label' => $this->l('Columns of Child Items:'),
-					'name' => 'columns',
-					'options' => array(
-						'id' => 'id',
-						'name' => 'name',
-						'query' => array(
-							array(
-								'id' => '1',
-								'name' => 1
-							),
-							array(
-								'id' => '2',
-								'name' => 2
-							),
-							array(
-								'id' => '3',
-								'name' => 3
-							),
-							array(
-								'id' => '4',
-								'name' => 4
-							)
-						)
-					),
-					'required' => true,
-					'desc' => $this->l('How many columns should display for children of this menu item')
-				),
-				array(
-					'type' => 'radio',
-					'label' => $this->l('Item Distribution:'),
-					'name' => 'distribution',
-					'desc' => $this->l('You can choose to distribute child items "evenly", "in-order" or "manually". For example, 7 items in 3 columns distributed evenly is: 3,2,2, in order it\'s 3,3,1'),
-					'class' => 't',
-					'values' => array(
-						array(
-							'id' => 'even',
-							'value' => 'even',
-							'label' => 'Evenly'
-						),
-						array(
-							'id' => 'inorder',
-							'value' => 'inorder',
-							'label' => 'In Order'
-						),
-						array(
-							'id' => 'manual',
-							'value' => 'manual',
-							'label' => 'Manually'
-						)
-					)
-				),
-				array(
-					'type' => 'text',
-					'label' => $this->l('Manual Item Distribution:'),
-					'name' => 'manual_distribution',
-					'desc' => $this->l('Comma separated count of rows in each column, eg: 4,2,3'),
-					'size' => 30,
-					'maxlength' => 15
-				),*/
 				array(
 					'type' => 'text',
 					'label' => $this->l('Drop-Down Width (px):'),
@@ -420,82 +359,7 @@ class BlockEtdTopMenu extends Module {
 					'desc' => $this->l('Width of any dropdown column in px, eg: 400'),
 					'size' => 10,
 					'maxlength' => 4
-				),/*
-				array(
-					'type' => 'text',
-					'label' => $this->l('Column Widths (px):'),
-					'name' => 'column_widths',
-					'desc' => $this->l('Comma separated columns, eg: 100,150,300'),
-					'size' => 30,
-					'maxlength' => 15
-				),
-				array(
-					'type' => 'switch',
-					'label' => $this->l('Group Child Items:'),
-					'name' => 'children_group',
-					'desc' => $this->l('Select this to group children under menu item rather than treating as a submenu'),
-					'is_bool' => true,
-					'values' => array(
-						array(
-							'id' => 'group_on',
-							'value' => 1,
-							'label' => $this->l('Yes')
-						),
-						array(
-							'id' => 'group_off',
-							'value' => 0,
-							'label' => $this->l('No')
-						)
-					)
-				),
-				array(
-					'type' => 'radio',
-					'label' => $this->l('Child Item Type:'),
-					'name' => 'children_type',
-					'desc' => $this->l('Select this to group children under menu item rather than treating as a submenu'),
-					'class' => 't',
-					'values' => array(
-						array(
-							'id' => 'children_type0',
-							'value' => 'menuitems',
-							'label' => 'Menu Items'
-						),
-						array(
-							'id' => 'children_type1',
-							'value' => 'modules',
-							'label' => 'Modules'
-						),
-						array(
-							'id' => 'children_type2',
-							'value' => 'modulehooks',
-							'label' => 'Module Hooks'
-						)
-					)
-				),
-				array(
-					'type' => 'select',
-					'label' => $this->l('Child Modules:'),
-					'name' => 'modules',
-					'options' => array(
-						'id' => 'id_module',
-						'name' => 'name',
-						'query' => $modules
-					),
-					'required' => true,
-					'desc' => $this->l('')
-				),
-				array(
-					'type' => 'select',
-					'label' => $this->l('Child Module Hooks:'),
-					'name' => 'module_hooks',
-					'options' => array(
-						'id' => 'id_hook',
-						'name' => 'name',
-						'query' => $module_hooks
-					),
-					'required' => true,
-					'desc' => $this->l('')
-				)*/
+				)
 			),
 			'submit' => array(
 				'name' => 'submitLink',

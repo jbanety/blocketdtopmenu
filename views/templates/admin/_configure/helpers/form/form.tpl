@@ -1,9 +1,9 @@
 {**
  * @package     blocketdtopmenu
  *
- * @version     1.6
- * @copyright   Copyright (C) 2015 Jean-Baptiste Alleaume. Tous droits réservés.
- * @license     http://alleau.me/LICENSE
+ * @version     2.0
+ * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
+ * @license     https://raw.githubusercontent.com/jbanety/blocketdtopmenu/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
  *}
 {extends file="helpers/form/form.tpl"}

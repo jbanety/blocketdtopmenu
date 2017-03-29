@@ -2,9 +2,9 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     1.0.1
- * @copyright   Copyright (C) 2014 Jean-Baptiste Alleaume. Tous droits réservés.
- * @license     http://alleau.me/LICENSE
+ * @version     2.0
+ * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
+ * @license     https://raw.githubusercontent.com/jbanety/blocketdtopmenu/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
  */
 
@@ -326,4 +326,5 @@ class EtdPrestashopLayout extends AbstractRokMenuLayout {
 
         return implode('|', $cache_array);
     }
+
 }
