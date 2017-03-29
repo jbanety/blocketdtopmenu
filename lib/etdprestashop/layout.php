@@ -34,28 +34,13 @@ class EtdPrestashopLayout extends AbstractRokMenuLayout
 	public function stageHeader()
 	{
 
-		/*JHtml::_('behavior.framework', true);
-		if (!self::$jsLoaded && $gantry->get('layout-mode', 'responsive') == 'responsive'){
-			if (!($gantry->browser->name == 'ie' && $gantry->browser->shortver < 9)){
-				$gantry->addScript($gantry->baseUrl . 'modules/mod_roknavmenu/themes/default/js/rokmediaqueries.js');
-				$gantry->addScript($gantry->baseUrl . 'modules/mod_roknavmenu/themes/default/js/responsive.js');
-				if ($this->args['responsive-menu'] == 'selectbox') $gantry->addScript($gantry->baseUrl . 'modules/mod_roknavmenu/themes/default/js/responsive-selectbox.js');
-			}
-			self::$jsLoaded = true;
-		}
-		$gantry->addLess('menu.less', 'menu.css', 1, array('headerstyle'=>$gantry->get('headerstyle','dark'), 'menuHoverColor'=>$gantry->get('linkcolor')));
-
-		// no media queries for IE8 so we compile and load the hovers
-		if ($gantry->browser->name == 'ie' && $gantry->browser->shortver < 9){
-			$gantry->addLess('menu-hovers.less', 'menu-hovers.css', 1, array('headerstyle'=>$gantry->get('headerstyle','dark'), 'menuHoverColor'=>$gantry->get('linkcolor')));
-		}*/
 	}
 
 	protected function renderItem(PrestashopRokMenuNode &$item, RokMenuNodeTree &$menu)
 	{
 
 		$wrapper_css = '';
-		$ul_css = '';
+		$ul_css = [];
 		$group_css = '';
 
 		$item_params = $item->getParams();
@@ -132,28 +117,7 @@ class EtdPrestashopLayout extends AbstractRokMenuLayout
 			$group_css = ' type-module';
 		}
 
-		//not so elegant solution to add subtext
-		/*$item_subtext = $item_params->get('dropdown_item_subtext','');
-		if ($item_subtext=='') $item_subtext = false;
-		else $item->addLinkClass('subtext');*/
 		$item_subtext = false;
-
-		//sort out module children:
-		if ($child_type!="menuitems") {
-			$document	= JFactory::getDocument();
-			$renderer	= $document->loadRenderer('module');
-			$params		= array('style'=>'dropdown');
-
-			$mod_contents = array();
-			foreach ($modules as $mod)  {
-
-				$mod_contents[] = $renderer->render($mod, $params);
-			}
-			$item->setChildren($mod_contents);
-
-			$link_classes = explode(' ', $item->getLinkClasses());
-			$item->setLinkClasses($link_classes);
-		}
 
 		if ($item->getType() == 'separator') {
 			$item->addListItemClass('separator');
