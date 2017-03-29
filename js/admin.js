@@ -1,8 +1,8 @@
 /**
 * @package     blocketdtopmenu
 *
-* @version     1.0.1
-* @copyright   Copyright (C) 2014 Jean-Baptiste Alleaume. Tous droits réservés.
+* @version     1.6
+* @copyright   Copyright (C) 2015 Jean-Baptiste Alleaume. Tous droits réservés.
 * @license     http://alleau.me/LICENSE
 * @author      Jean-Baptiste Alleaume http://alleau.me
 */
@@ -14,11 +14,13 @@
 		initialized: false,
 		baseURI: '',
 		token: '',
+		$container: null,
 
 		init: function(config) {
 
 			this
 				.setOptions(config)
+				.createContainer()
 				.bindEvents()
 				.initialized = true;
 
@@ -44,6 +46,17 @@
 			return this;
 		},
 
+		createContainer: function() {
+
+			var $typeFormGroup = $('#type').parents('.form-group');
+
+			this.$container = $('<div id="ajax-container" style="min-height:42px"></div>');
+
+			$typeFormGroup.after(this.$container);
+
+			return this;
+		},
+
 		bindEvents: function() {
 
 			$('form.blocketdtopmenu select#type').on('change', this.loadType);
@@ -62,7 +75,8 @@
 
 			var self = window.blockEtdTopMenuAdmin;
 
-			$('form.blocketdtopmenu fieldset#fieldset_1').remove();
+			self.$container.empty();
+			self.$container.append($('<div class="col-lg-9 col-lg-offset-3"><i class="icon-refresh icon-spin icon-fw"></i> Chargement en cours...</div>'));
 
 			if ($('form.blocketdtopmenu select#type').val() != '') {
 
@@ -76,7 +90,8 @@
 						if (jsonData.hasError) {
 							alert(jsonData.msg);
 						} else {
-							$('form.blocketdtopmenu').append(jsonData.html);
+							self.$container.empty();
+							self.$container.append(jsonData.html);
 						}
 					}
 				});
