@@ -2,7 +2,7 @@
         <module>
             <name>blocketdtopmenu</name>
             <displayName><![CDATA[ETD Menu Horizontal]]></displayName>
-            <version><![CDATA[1.0.3]]></version>
+            <version><![CDATA[2.0.0]]></version>
             <description><![CDATA[Ajoute un menu am&eacute;lior&eacute; en haut de votre site e-commerce.]]></description>
             <author><![CDATA[ETD Solutions]]></author>
             <tab><![CDATA[front_office_features]]></tab>
