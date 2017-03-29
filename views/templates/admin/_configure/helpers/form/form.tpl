@@ -8,13 +8,11 @@
 
 		<table cellspacing="0" cellpadding="0" class="table" style="min-width:40em;">
 			<tr>
-				<!--<th><input type="checkbox" name="checkme" id="checkme" class="noborder" onclick="checkDelBoxes(this.form, '{$input.name}', this.checked)" /></th>-->
 				<th>{l s='Name' mod='blocketdtopmenu'}</th>
 				<th>{l s='Status' mod='blocketdtopmenu'}</th>
 				<th>{l s='Ordering' mod='blocketdtopmenu'}</th>
 				<th>{l s='Access' mod='blocketdtopmenu'}</th>
 				<th>{l s='Menu Item Type' mod='blocketdtopmenu'}</th>
-				<!--<th>{l s='Home' mod='blocketdtopmenu'}</th>-->
 				<th>{l s='ID' mod='blocketdtopmenu'}</th>
 				<th>{l s='Actions' mod='blocketdtopmenu'}</th>
 			</tr>
@@ -23,9 +21,6 @@
 				{$orderkey = array_search($link.id, $input.ordering[$link.parent_id])}
 
 				<tr {if $link@iteration % 2}class="alt_row"{/if}>
-					<!--<td>
-						<input type="checkbox" class="cmsBox" name="{$input.name}" id="link_{$link.id}" value="{$link.id}">
-					</td>-->
 					<td>
 						<strong>{str_repeat('|&mdash;', ($link.level - 1))}{if $link.level > 1}&nbsp;{/if}<a href="{$current}&token={$token}&editLink&id_link={(int)$link.id}" title="{l s='Edit' mod='blocketdtopmenu'}">{$link.title}</a></strong>
 					</td>
@@ -35,12 +30,12 @@
 					<td>
 						{if isset($input.ordering[$link.parent_id][$orderkey - 1])}
 						<a href="{$current}&token={$token}&orderUp&id_link={(int)$link.id}">
-							<img src="{$smarty.const._PS_ADMIN_IMG_}{if $order_way == 'ASC'}down{else}up{/if}.gif" alt="{l s='Down'}" title="{l s='Down'}" />
+							<img src="{$smarty.const._PS_ADMIN_IMG_}{if isset($order_way) and $order_way == 'ASC'}down{else}up{/if}.gif" alt="{l s='Down'}" title="{l s='Down'}" />
 						</a>
 						{/if}
 						{if isset($input.ordering[$link.parent_id][$orderkey + 1])}
 							<a href="{$current}&token={$token}&orderDown&id_link={(int)$link.id}">
-							<img src="{$smarty.const._PS_ADMIN_IMG_}{if $order_way == 'ASC'}up{else}down{/if}.gif" alt="{l s='Up'}" title="{l s='Up'}" />
+							<img src="{$smarty.const._PS_ADMIN_IMG_}{if isset($order_way) and $order_way == 'ASC'}up{else}down{/if}.gif" alt="{l s='Up'}" title="{l s='Up'}" />
 						</a>
 						{/if}
 					</td>
@@ -78,9 +73,6 @@
 							{l s='Unknown'}
 						{/if}
 					</td>
-					<!--<td align="center">
-						<img src="{$smarty.const._PS_ADMIN_IMG_}{if $link.home}enabled.gif{else}disabled.gif{/if}" alt="{if $link.home}{l s='Enabled'}{else}{l s='Disabled'}{/if}" title="{if $link.home}{l s='Enabled'}{else}{l s='Disabled'}{/if}" />
-					</td>-->
 					<td>
 						{$link.id}
 					</td>

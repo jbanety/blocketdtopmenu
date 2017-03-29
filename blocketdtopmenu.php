@@ -19,7 +19,7 @@ class BlockEtdTopMenu extends Module {
 
 		$this->name = 'blocketdtopmenu';
 		$this->tab = 'front_office_features';
-		$this->version = '1.0';
+		$this->version = '1.0.3';
 		$this->author = 'ETD Solutions';
 
 		parent::__construct();
