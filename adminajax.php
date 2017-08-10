@@ -2,9 +2,9 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     1.0.1
- * @copyright   Copyright (C) 2014 Jean-Baptiste Alleaume. Tous droits réservés.
- * @license     http://alleau.me/LICENSE
+ * @version     2.1
+ * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
+ * @license     https://raw.githubusercontent.com/jbanety/blocketdcustom/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
  */
 

@@ -1,11 +1,11 @@
 /**
-* @package     blocketdtopmenu
-*
-* @version     1.6
-* @copyright   Copyright (C) 2015 Jean-Baptiste Alleaume. Tous droits réservés.
-* @license     http://alleau.me/LICENSE
-* @author      Jean-Baptiste Alleaume http://alleau.me
-*/
+ * @package     blocketdtopmenu
+ *
+ * @version     2.1
+ * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
+ * @license     https://raw.githubusercontent.com/jbanety/blocketdcustom/master/LICENSE
+ * @author      Jean-Baptiste Alleaume http://alleau.me
+ */
 
 (function($) {
 
@@ -24,12 +24,11 @@
 				.bindEvents()
 				.initialized = true;
 
-			var type = $('form.blocketdtopmenu select#type');
-			if (type.length > 0 && type.val() != '') {
-				this.loadType();
-			}
+			this.changeColumns();
 
-			this.changeChildrenType();
+            if ($('form.blocketdtopmenu select#type').length > 0 && $('form.blocketdtopmenu select#type').val() != '') {
+                this.loadType();
+            }
 
 		},
 
@@ -60,13 +59,12 @@
 		bindEvents: function() {
 
 			$('form.blocketdtopmenu select#type').on('change', this.loadType);
+			$('form.blocketdtopmenu select[name="params[columns]').on('change', this.changeColumns);
 
 			$('#desc--save').on('click', function(e) {
 				e.preventDefault();
 				$('form.blocketdtopmenu').submit();
 			});
-
-			$('input[name="children_type"]').on('change', this.changeChildrenType);
 
 			return this;
 		},
@@ -76,9 +74,12 @@
 			var self = window.blockEtdTopMenuAdmin;
 
 			self.$container.empty();
-			self.$container.append($('<div class="col-lg-9 col-lg-offset-3"><i class="icon-refresh icon-spin icon-fw"></i> Chargement en cours...</div>'));
 
-			if ($('form.blocketdtopmenu select#type').val() != '') {
+            if ($('form.blocketdtopmenu select#type').val() == '') {
+            	return this;
+            }
+
+			self.$container.append($('<div class="col-lg-9 col-lg-offset-3"><i class="icon-refresh icon-spin icon-fw"></i> Chargement en cours...</div>'));
 
 				// On envoi la demande.
 				$.ajax(self.baseURI + 'adminajax.php', {
@@ -95,20 +96,26 @@
 						}
 					}
 				});
-			}
+
+
+			return self;
 		},
 
-		changeChildrenType: function() {
-			var selection = $('input[name="children_type"]:checked').val();
-			if (selection == 'modules') {
-				$('select#module_hooks').hide().parent('div').hide().prev('label').hide();
-				$('select#modules').show().parent('div').show().prev('label').show();
-			} else if (selection == 'modulehooks') {
-				$('select#modules').hide().parent('div').hide().prev('label').hide();
-				$('select#module_hooks').show().parent('div').show().prev('label').show();
-			} else {
-				$('select#modules, select#module_hooks').hide().parent('div').hide().prev('label').hide();
-			}
+		changeColumns: function() {
+
+            var selection = parseInt($('form.blocketdtopmenu select[name="params[columns]"]').val());
+            var $divs = $('.columns_widths > div');
+            $divs.hide();
+
+            var w = (100 / selection).toFixed(5);
+
+            $divs.each(function(i) {
+            	if (i < selection) {
+                    $(this).width(w+'%');
+                    $(this).show();
+				}
+			});
+
 		},
 
 		_buildQueryString: function() {

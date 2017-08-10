@@ -1,9 +1,9 @@
 {**
  * @package     blocketdtopmenu
  *
- * @version     2.0
+ * @version     2.1
  * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
- * @license     https://raw.githubusercontent.com/jbanety/blocketdtopmenu/master/LICENSE
+ * @license     https://raw.githubusercontent.com/jbanety/blocketdcustom/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
  *}
 {extends file="helpers/form/form.tpl"}
@@ -20,7 +20,8 @@
 	<h3>
 		{if isset($field.image)}<img src="{$field.image}" alt="{$field.title|escape:'html':'UTF-8'}" />{/if}
 		{if isset($field.icon)}<i class="{$field.icon}"></i>{/if}
-		{$field.title}
+        {$field.title}
+        {if isset($field.count)}<span class="badge">{$field.count}</span>{/if}
 		<span class="panel-heading-action">
 			{foreach from=$toolbar_btn item=btn key=k}
 				{if $k != 'modules-list' && $k != 'back'}
@@ -48,6 +49,47 @@
 		{/foreach}
 		</select>
 
+	{elseif $input.type == 'columns_widths'}
+		{$values = $fields_value[$input.name]}
+		<div class="columns_widths">
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][1]" placeholder="Col 1" value="{if !empty($values)}{$values->{'1'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][2]" placeholder="Col 2" value="{if !empty($values)}{$values->{'2'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][3]" placeholder="Col 3" value="{if !empty($values)}{$values->{'3'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][4]" placeholder="Col 4" value="{if !empty($values)}{$values->{'4'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][5]" placeholder="Col 5" value="{if !empty($values)}{$values->{'5'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][6]" placeholder="Col 6" value="{if !empty($values)}{$values->{'6'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][7]" placeholder="Col 7" value="{if !empty($values)}{$values->{'7'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][8]" placeholder="Col 8" value="{if !empty($values)}{$values->{'8'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][9]" placeholder="Col 9" value="{if !empty($values)}{$values->{'9'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][10]" placeholder="Col 10" value="{if !empty($values)}{$values->{'10'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][11]" placeholder="Col 11" value="{if !empty($values)}{$values->{'11'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<div style="float:left">
+				<input type="text" class="form-control" name="params[columns_widths][12]" placeholder="Col 12" value="{if !empty($values)}{$values->{'12'}|escape:'html':'UTF-8'}{/if}">
+			</div>
+			<span class="clearfix"></span>
+		</div>
 	{else}
 		{$smarty.block.parent}
     {/if}
@@ -63,107 +105,100 @@
 		{assign var=links value=$input.values}
 		{if isset($links) && count($links) > 0}
 			<div class="row">
-				<div class="col-lg-12">
-					<div class="panel">
-						<div class="panel-heading">
-							{$input.label}
-						</div>
-						<table class="table">
-							<thead>
-							<tr>
-								<th>{l s='Name' mod='blocketdtopmenu'}</th>
-								<th>{l s='Status' mod='blocketdtopmenu'}</th>
-								<th>{l s='Ordering' mod='blocketdtopmenu'}</th>
-								<th>{l s='Access' mod='blocketdtopmenu'}</th>
-								<th>{l s='Menu Item Type' mod='blocketdtopmenu'}</th>
-								<th>{l s='ID' mod='blocketdtopmenu'}</th>
-								<th>{l s='Actions' mod='blocketdtopmenu'}</th>
-							</tr>
-							</thead>
-							<tbody>
-							{foreach $links as $key => $link}
-								{$orderkey = array_search($link.id, $input.ordering[$link.parent_id])}
-								<tr {if $key%2}class="alt_row"{/if}>
-									<td>
-										<strong>{str_repeat('|&mdash;', ($link.level - 1))}{if $link.level > 1}&nbsp;{/if}<a href="{$current}&token={$token}&editLink&id_link={(int)$link.id}" title="{l s='Edit' mod='blocketdtopmenu'}">{$link.title}</a></strong>
-									</td>
-									<td align="center">
-										<img src="{$smarty.const._PS_ADMIN_IMG_}{if $link.published}enabled.gif{else}disabled.gif{/if}" alt="{if $link.published}{l s='Enabled'}{else}{l s='Disabled'}{/if}" title="{if $link.published}{l s='Enabled'}{else}{l s='Disabled'}{/if}" />
-									</td>
-									<td>
-										{if isset($input.ordering[$link.parent_id][$orderkey - 1])}
-											<a href="{$current}&token={$token}&orderUp&id_link={(int)$link.id}">
-												<img src="{$smarty.const._PS_ADMIN_IMG_}up.gif" alt="{l s='Up'}" title="{l s='Up'}" />
-											</a>
-										{/if}
-										{if isset($input.ordering[$link.parent_id][$orderkey + 1])}
-											<a href="{$current}&token={$token}&orderDown&id_link={(int)$link.id}">
-												<img src="{$smarty.const._PS_ADMIN_IMG_}down.gif" alt="{l s='Down'}" title="{l s='Down'}" />
-											</a>
-										{/if}
-									</td>
-									<td>
-										{if $link.access == 0}
-											{l s='Public'}
-										{elseif $link.access == 1}
-											{l s='Guests'}
-										{elseif $link.access == 2}
-											{l s='Customers'}
-										{/if}
-									</td>
-									<td>
-										{if $link.type == 'page'}
-											{l s='Page'}
-										{elseif $link.type == 'pcategory'}
-											{l s='Product Category'}
-										{elseif $link.type == 'product'}
-											{l s='Product'}
-										{elseif $link.type == 'cms'}
-											{l s='CMS Page'}
-										{elseif $link.type == 'ccategory'}
-											{l s='CMS Category'}
-										{elseif $link.type == 'supplier'}
-											{l s='Supplier'}
-										{elseif $link.type == 'manufacturer'}
-											{l s='Manufacturer'}
-										{elseif $link.type == 'manufacturer'}
-											{l s='Manufacturer'}
-										{elseif $link.type == 'module'}
-											{l s='Module'}
-										{elseif $link.type == 'separator'}
-											{l s='Separator'}
-										{else}
-											{l s='Unknown'}
-										{/if}
-									</td>
-									<td>
-										{$link.id}
-									</td>
-									<td>
-										<div class="btn-group-action">
-											<div class="btn-group pull-right">
-												<a class="btn btn-default" href="{$current}&token={$token}&editLink&id_link={(int)$link.id}" title="{l s='Edit' mod='blocketdtopmenu'}">
-													<i class="icon-edit"></i> {l s='Edit' mod='blocketdtopmenu'}
+				<table class="table">
+					<thead>
+					<tr>
+						<th>{l s='Name' mod='blocketdtopmenu'}</th>
+						<th class="text-center">{l s='Status' mod='blocketdtopmenu'}</th>
+						<th class="text-center">{l s='Ordering' mod='blocketdtopmenu'}</th>
+						<th>{l s='Access' mod='blocketdtopmenu'}</th>
+						<th>{l s='Menu Item Type' mod='blocketdtopmenu'}</th>
+						<th>{l s='ID' mod='blocketdtopmenu'}</th>
+						<th class="title_box text-right">{l s='Actions' mod='blocketdtopmenu'}</th>
+					</tr>
+					</thead>
+					<tbody>
+					{foreach $links as $key => $link}
+						{$orderkey = array_search($link.id, $input.ordering[$link.parent_id])}
+						<tr {if $key%2}class="alt_row"{/if}>
+							<td>
+								<strong>{str_repeat('|&mdash;', ($link.level - 1))}{if $link.level > 1}&nbsp;{/if}<a href="{$current}&token={$token}&editLink&id_link={(int)$link.id}" title="{l s='Edit' mod='blocketdtopmenu'}">{$link.title}</a></strong>
+							</td>
+							<td class="text-center">
+								<i class="icon-{if $link.published}check{else}times{/if}"></i>
+							</td>
+							<td class="text-center">
+								{if isset($input.ordering[$link.parent_id][$orderkey - 1])}
+									<a href="{$current}&token={$token}&orderUp&id_link={(int)$link.id}" class="btn btn-link">
+										<i class="icon-caret-square-o-up"></i>
+									</a>
+								{/if}
+								{if isset($input.ordering[$link.parent_id][$orderkey + 1])}
+									<a href="{$current}&token={$token}&orderDown&id_link={(int)$link.id}" class="btn btn-link">
+										<i class="icon-caret-square-o-down"></i>
+									</a>
+								{/if}
+							</td>
+							<td>
+								{if $link.access == 0}
+									{l s='Public'}
+								{elseif $link.access == 1}
+									{l s='Guests'}
+								{elseif $link.access == 2}
+									{l s='Customers'}
+								{/if}
+							</td>
+							<td>
+								{if $link.type == 'page'}
+									{l s='Page'}
+								{elseif $link.type == 'pcategory'}
+									{l s='Product Category'}
+								{elseif $link.type == 'product'}
+									{l s='Product'}
+								{elseif $link.type == 'cms'}
+									{l s='CMS Page'}
+								{elseif $link.type == 'ccategory'}
+									{l s='CMS Category'}
+								{elseif $link.type == 'supplier'}
+									{l s='Supplier'}
+								{elseif $link.type == 'manufacturer'}
+									{l s='Manufacturer'}
+								{elseif $link.type == 'manufacturer'}
+									{l s='Manufacturer'}
+								{elseif $link.type == 'module'}
+									{l s='Module'}
+								{elseif $link.type == 'separator'}
+									{l s='Separator'}
+								{else}
+									{l s='Unknown'}
+								{/if}
+							</td>
+							<td>
+								{$link.id}
+							</td>
+							<td>
+								<div class="btn-group-action">
+									<div class="btn-group pull-right">
+										<a class="btn btn-default" href="{$current}&token={$token}&editLink&id_link={(int)$link.id}" title="{l s='Edit' mod='blocketdtopmenu'}">
+											<i class="icon-edit"></i> {l s='Edit' mod='blocketdtopmenu'}
+										</a>
+										<button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+											<i class="icon-caret-down"></i>&nbsp;
+										</button>
+										<ul class="dropdown-menu">
+											<li>
+												<a href="{$current}&token={$token}&deleteLink&id_link={(int)$link.id}" title="{l s='Delete' mod='blocketdtopmenu'}" onclick="return confirm('{l s='Do you really want to delete this link?' mod='blocketdtopmenu'}');">
+													<i class="icon-trash"></i> {l s='Delete' mod='blocketdtopmenu'}
 												</a>
-												<button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-													<i class="icon-caret-down"></i>&nbsp;
-												</button>
-												<ul class="dropdown-menu">
-													<li>
-														<a href="{$current}&token={$token}&deleteLink&id_link={(int)$link.id}" title="{l s='Delete' mod='blocketdtopmenu'}">
-															<i class="icon-trash"></i> {l s='Delete' mod='blocketdtopmenu'}
-														</a>
-													</li>
-												</ul>
-											</div>
-										</div>
-									</td>
-								</tr>
-							{/foreach}
-							</tbody>
-						</table>
-					</div>
-				</div>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</td>
+						</tr>
+					{/foreach}
+					</tbody>
+				</table>
 			</div>
 		{else}
 			<p>{l s='No links have been created.' mod='blocketdtopmenu'}</p>

@@ -2,9 +2,9 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     2.0
+ * @version     2.1
  * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
- * @license     https://raw.githubusercontent.com/jbanety/blocketdtopmenu/master/LICENSE
+ * @license     https://raw.githubusercontent.com/jbanety/blocketdcustom/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
  */
 
@@ -19,7 +19,7 @@ class BlockEtdTopMenu extends Module {
 
 		$this->name = 'blocketdtopmenu';
 		$this->tab = 'front_office_features';
-		$this->version = '2.0';
+		$this->version = '2.1';
 		$this->author = 'ETD Solutions';
 
 		$this->bootstrap = true;
@@ -93,11 +93,16 @@ class BlockEtdTopMenu extends Module {
 					'href' => $current_index.'&amp;configure='.$this->name.'&amp;token='.$token.'&amp;addLink',
 					'desc' => $this->l('Add new')
 				);
-				$this->toolbar_btn['refresh-cache'] = array(
+				$this->toolbar_btn['rebuild'] = array(
 					'href' => $current_index.'&amp;configure='.$this->name.'&amp;token='.$token.'&amp;rebuildMenu',
 					'desc' => $this->l('Rebuild menu'),
-					'class' => 'icon-refresh'
+					'class' => 'icon-bolt'
 				);
+                $this->toolbar_btn['refresh-cache'] = array(
+                    'href' => $current_index.'&amp;configure='.$this->name.'&amp;token='.$token.'&amp;clearCache',
+                    'desc' => $this->l('Clear cache'),
+                    'class' => 'icon-eraser'
+                );
 			break;
 			default:
 				break;
@@ -148,9 +153,35 @@ class BlockEtdTopMenu extends Module {
 			)
 		);
 
+        $this->fields_form[1]['form'] = array(
+            'legend' => array(
+                'title' => $this->l('Settings'),
+                'icon' => 'icon-cogs'
+            ),
+            'input' => array(
+                array(
+                    'type' => 'text',
+                    'label' => $this->l('Tag Class'),
+                    'name' => 'ETDTOPMENU_TAGCLASS',
+                    'desc' => $this->l('')
+                ),
+                array(
+                    'type' => 'text',
+                    'label' => $this->l('Tag ID'),
+                    'name' => 'ETDTOPMENU_TAGID',
+                    'desc' => $this->l('')
+                )
+            ),
+            'submit' => array(
+                'name' => 'submitSettings',
+                'title' => $this->l('Save'),
+            )
+        );
+
 		$helper = $this->initForm();
 		$helper->submit_action = '';
 		$helper->title = $this->l('Top Menu Links');
+        $helper->fields_value = $this->getConfigValues();
 
 		if (isset($this->fields_value))
 			$helper->fields_value = $this->fields_value;
@@ -170,16 +201,6 @@ class BlockEtdTopMenu extends Module {
 			$id_link = (int)Tools::getValue('id_link');
 			$link = BlockEtdTopMenuModel::getLink($id_link);
 		}
-
-
-		$modules = Module::getModulesInstalled(false);
-		$instances = array();
-		foreach ($modules as $module)
-			if ($module['active']==1)
-				$instances[$module['name']] = $module;
-		ksort($instances);
-		$modules = $instances;
-		$module_hooks = Hook::getHooks(false);
 
 		$this->fields_form[0]['form'] = array(
 			'legend' => array(
@@ -240,9 +261,13 @@ class BlockEtdTopMenu extends Module {
 								'name' => $this->l('Manufacturer')
 							),
 							array(
-								'id' => 'module',
-								'name' => $this->l('Module')
-							)
+								'id' => 'hook',
+								'name' => $this->l('Hook')
+							),
+                            array(
+                                'id' => 'url',
+                                'name' => $this->l('URL')
+                            )
 						)
 					),
 					'required' => true,
@@ -258,14 +283,6 @@ class BlockEtdTopMenu extends Module {
 					'maxlength' => 255,
 					'required' => true
 				),
-				/*array(
-					'type' => 'text',
-					'label' => $this->l('Link URL:'),
-					'name' => 'url',
-					'desc' => $this->l(''),
-					'readonly' => true,
-					'size' => 40
-				),*/
 				array(
 					'type' => 'switch',
 					'label' => $this->l('Published:'),
@@ -344,6 +361,13 @@ class BlockEtdTopMenu extends Module {
 					),
 					'desc' => $this->l('')
 				),
+                array(
+                    'type' => 'text',
+                    'label' => $this->l('Menu image:'),
+                    'name' => 'image',
+                    'desc' => $this->l(''),
+                    'maxlength' => 255
+                ),
 				array(
 					'type' => 'text',
 					'label' => $this->l('CSS Class:'),
@@ -352,14 +376,115 @@ class BlockEtdTopMenu extends Module {
 					'size' => 40,
 					'maxlength' => 255
 				),
-				array(
-					'type' => 'text',
-					'label' => $this->l('Drop-Down Width (px):'),
-					'name' => 'width',
-					'desc' => $this->l('Width of any dropdown column in px, eg: 400'),
-					'size' => 10,
-					'maxlength' => 4
-				)
+                array(
+                    'type' => 'switch',
+                    'label' => $this->l('Group Child Items:'),
+                    'name' => 'params[group_child_items]',
+                    'desc' => $this->l('Select this to group children under menu item rather than treating as a submenu'),
+                    'is_bool' => true,
+                    'values' => array(
+                        array(
+                            'id' => 'group_on',
+                            'value' => 1,
+                            'label' => $this->l('Yes')
+                        ),
+                        array(
+                            'id' => 'group_off',
+                            'value' => 0,
+                            'label' => $this->l('No')
+                        )
+                    )
+                ),
+                array(
+                    'type' => 'switch',
+                    'label' => $this->l('Show title:'),
+                    'name' => 'params[show_title]',
+                    'desc' => $this->l('Select this to show title on top of the grouped children list'),
+                    'is_bool' => true,
+                    'default_value' => 1,
+                    'values' => array(
+                        array(
+                            'id' => 'show_title_on',
+                            'value' => 1,
+                            'label' => $this->l('Yes')
+                        ),
+                        array(
+                            'id' => 'show_title_off',
+                            'value' => 0,
+                            'label' => $this->l('No')
+                        )
+                    )
+                ),
+                array(
+                    'type' => 'select',
+                    'label' => $this->l('Columns of Child Items:'),
+                    'name' => 'params[columns]',
+                    'desc' => $this->l('How many columns should display for children of this menu item'),
+                    'options' => array(
+                        'id' => 'id',
+                        'name' => 'name',
+                        'default' => array(
+                            'value' => '',
+                            'label' => '--'
+                        ),
+                        'query' => array(
+                            array(
+                                'id' => 1,
+                                'name' => 1
+                            ),
+                            array(
+                                'id' => 2,
+                                'name' => 2
+                            ),
+                            array(
+                                'id' => 3,
+                                'name' => 3
+                            ),
+                            array(
+                                'id' => 4,
+                                'name' => 4
+                            ),
+                            array(
+                                'id' => 5,
+                                'name' => 5
+                            ),
+                            array(
+                                'id' => 6,
+                                'name' => 6
+                            ),
+                            array(
+                                'id' => 7,
+                                'name' => 7
+                            ),
+                            array(
+                                'id' => 8,
+                                'name' => 8
+                            ),
+                            array(
+                                'id' => 9,
+                                'name' => 9
+                            ),
+                            array(
+                                'id' => 10,
+                                'name' => 10
+                            ),
+                            array(
+                                'id' => 11,
+                                'name' => 11
+                            ),
+                            array(
+                                'id' => 12,
+                                'name' => 12
+                            )
+                        )
+                    )
+                ),
+                array(
+                    'type' => 'columns_widths',
+                    'label' => $this->l('Columns CSS Classes:'),
+                    'name' => 'params[columns_widths]',
+                    'desc' => $this->l('CSS Classes to apply to columns to size them.')
+                )
 			),
 			'submit' => array(
 				'name' => 'submitLink',
@@ -424,68 +549,30 @@ class BlockEtdTopMenu extends Module {
 		else
 			$this->fields_value['css'] = '';
 
-		if (Tools::getValue('columns'))
-			$this->fields_value['columns'] = Tools::getValue('columns');
-		else if (isset($link))
-			$this->fields_value['columns'] = $link['columns'];
-		else
-			$this->fields_value['columns'] = '';
+        if (Tools::getValue('image'))
+            $this->fields_value['image'] = Tools::getValue('image');
+        else if (isset($link))
+            $this->fields_value['image'] = $link['image'];
+        else
+            $this->fields_value['image'] = '';
 
-		if (Tools::getValue('distribution'))
-			$this->fields_value['distribution'] = Tools::getValue('distribution');
-		else if (isset($link))
-			$this->fields_value['distribution'] = $link['distribution'];
-		else
-			$this->fields_value['distribution'] = '';
+        if (Tools::getValue('params')) {
+            $params = Tools::getValue('params');
+            foreach ($params as $k => $v) {
+                $this->fields_value['params[' . $k . ']'] = $v;
+            }
+        } else if (isset($link) && isset($link['params'])) {
+            foreach (get_object_vars($link['params']) as $k => $v) {
+                $this->fields_value['params[' . $k . ']'] = $v;
+            }
+        } else {
+            $this->fields_value['params[item_column]'] = '';
+            $this->fields_value['params[group_child_items]'] = '0';
+            $this->fields_value['params[columns]'] = '';
+            $this->fields_value['params[columns_widths]'] = '';
+            $this->fields_value['params[show_title]'] = '0';
+        }
 
-		if (Tools::getValue('manual_distribution'))
-			$this->fields_value['manual_distribution'] = Tools::getValue('manual_distribution');
-		else if (isset($link))
-			$this->fields_value['manual_distribution'] = $link['manual_distribution'];
-		else
-			$this->fields_value['manual_distribution'] = '';
-
-		if (Tools::getValue('width'))
-			$this->fields_value['width'] = Tools::getValue('width');
-		else if (isset($link))
-			$this->fields_value['width'] = $link['width'];
-		else
-			$this->fields_value['width'] = '';
-
-		if (Tools::getValue('column_widths'))
-			$this->fields_value['column_widths'] = Tools::getValue('column_widths');
-		else if (isset($link))
-			$this->fields_value['column_widths'] = $link['column_widths'];
-		else
-			$this->fields_value['column_widths'] = '';
-
-		if (Tools::getValue('children_group'))
-			$this->fields_value['children_group'] = Tools::getValue('children_group');
-		else if (isset($link))
-			$this->fields_value['children_group'] = $link['children_group'];
-		else
-			$this->fields_value['children_group'] = '';
-
-		if (Tools::getValue('children_type'))
-			$this->fields_value['children_type'] = Tools::getValue('children_type');
-		else if (isset($link))
-			$this->fields_value['children_type'] = $link['children_type'];
-		else
-			$this->fields_value['children_type'] = '';
-
-		if (Tools::getValue('modules'))
-			$this->fields_value['modules'] = Tools::getValue('modules');
-		else if (isset($link))
-			$this->fields_value['modules'] = $link['modules'];
-		else
-			$this->fields_value['modules'] = '';
-
-		if (Tools::getValue('module_hooks'))
-			$this->fields_value['module_hooks'] = Tools::getValue('module_hooks');
-		else if (isset($link))
-			$this->fields_value['module_hooks'] = $link['module_hooks'];
-		else
-			$this->fields_value['module_hooks'] = '';
 
 		$helper = $this->initForm();
 		$helper->submit_action = '';
@@ -531,7 +618,7 @@ class BlockEtdTopMenu extends Module {
 		if (Tools::isSubmit('submitLink')) {
 
 			$type = Tools::getValue('type');
-			if (!in_array($type, array('separator','page','pcategory','product','cms','ccategory','supplier','manufacturer','module'))) {
+			if (!in_array($type, array('separator','page','pcategory','product','cms','ccategory','supplier','manufacturer','module','url','hook'))) {
 				$this->_errors[] = $this->l('Please choose a valid type.');
 			}
 
@@ -551,6 +638,26 @@ class BlockEtdTopMenu extends Module {
 					if (!$params || !array_key_exists('id_meta', $params) || empty($params['id_meta']))
 						$this->_errors[] = $this->l('You must choose a page.');
 				break;
+                case 'product':
+                    if (!$params || !array_key_exists('id_product', $params) || empty($params['id_product']))
+                        $this->_errors[] = $this->l('You must choose a product.');
+                break;
+                case 'supplier':
+                    if (!$params || !array_key_exists('id_supplier', $params) || empty($params['id_supplier']))
+                        $this->_errors[] = $this->l('You must choose a supplier.');
+                break;
+                case 'manufacturer':
+                    if (!$params || !array_key_exists('id_manufacturer', $params) || empty($params['id_manufacturer']))
+                        $this->_errors[] = $this->l('You must choose a manufacturer.');
+                break;
+                case 'hook':
+                    if (!$params || !array_key_exists('hook', $params) || empty($params['hook']))
+                        $this->_errors[] = $this->l('You must type a hook name.');
+                break;
+                case 'url':
+                    if (!$params || !array_key_exists('url', $params) || empty($params['url']))
+                        $this->_errors[] = $this->l('You must type an url.');
+                break;
 				case 'pcategory':
 					if (!$params || !array_key_exists('id_category', $params) || empty($params['id_category']))
 						$this->_errors[] = $this->l('You must choose a category.');
@@ -565,7 +672,7 @@ class BlockEtdTopMenu extends Module {
 
 		if (count($this->_errors)) {
 			foreach ($this->_errors as $err)
-				$this->_html .= '<div class="alert error">'.$err.'</div>';
+				$this->_html .= '<div class="alert alert-danger">'.$err.'</div>';
 
 			return false;
 		}
@@ -649,8 +756,22 @@ class BlockEtdTopMenu extends Module {
 
 			Tools::redirectAdmin(AdminController::$currentIndex.'&configure='.$this->name.'&token='.Tools::getAdminTokenLite('AdminModules').'&'.$redirect);
 
-		} elseif (Tools::isSubmit('addLinkConfirmation'))
+		} elseif (Tools::isSubmit('clearCache')) {
+
+            BlockEtdTopMenuModel::cleanCache();
+            Tools::redirectAdmin(AdminController::$currentIndex.'&configure='.$this->name.'&token='.Tools::getAdminTokenLite('AdminModules').'&clearCacheConfirmation');
+
+        } elseif (Tools::isSubmit('submitSettings'))  {
+
+            Configuration::updateGlobalValue('ETDTOPMENU_TAGCLASS', Tools::getValue('ETDTOPMENU_TAGCLASS'));
+            Configuration::updateGlobalValue('ETDTOPMENU_TAGID', Tools::getValue('ETDTOPMENU_TAGID'));
+
+            $this->_html .= $this->displayConfirmation($this->l('Settings updated.'));
+
+        } elseif (Tools::isSubmit('addLinkConfirmation'))
 			$this->_html .= $this->displayConfirmation($this->l('Menu link added.'));
+		 elseif (Tools::isSubmit('clearCacheConfirmation'))
+			$this->_html .= $this->displayConfirmation($this->l('Cache cleared.'));
 		elseif (Tools::isSubmit('editLinkConfirmation'))
 			$this->_html .= $this->displayConfirmation($this->l('Menu link edited.'));
 		elseif (Tools::isSubmit('rebuildMenuConfirmation'))
@@ -711,7 +832,67 @@ class BlockEtdTopMenu extends Module {
 				);
 				break;
 
-			case 'page':
+            case 'product':
+                $label = $this->l('Product:');
+                $input = '<select name="params[id_product]" id="id_product"><option value="">--</option>';
+
+                $products = Product::getProducts($context->language->id, false, false, 'name', 'ASC');
+
+                foreach ($products as $product) {
+                    $selected = false;
+                    if ($link && $link['type'] == 'product' && $link['params']->id_product == $product['id_product']) {
+                        $selected = true;
+                    }
+                    $input .= '<option value="'.$product['id_product'].'"' . ( $selected ? 'selected="selected"' : '') . '>'.$product['name'].'</option>';
+                }
+                $input .= '</select>';
+                break;
+
+            case 'supplier':
+                $label = $this->l('Supplier:');
+                $input = '<select name="params[id_supplier]" id="id_supplier"><option value="">--</option>';
+
+                $suppliers = Supplier::getSuppliers();
+
+                foreach ($suppliers as $supplier) {
+                    $selected = false;
+                    if ($link && $link['type'] == 'supplier' && $link['params']->id_supplier == $supplier['id_supplier']) {
+                        $selected = true;
+                    }
+                    $input .= '<option value="'.$supplier['id_supplier'].'"' . ( $selected ? 'selected="selected"' : '') . '>'.$supplier['name'].'</option>';
+                }
+                $input .= '</select>';
+                break;
+
+            case 'manufacturer':
+                $label = $this->l('Manufacturer:');
+                $input = '<select name="params[id_manufacturer]" id="id_manufacturer"><option value="">--</option>';
+
+                $manufacturers = Manufacturer::getManufacturers();
+
+                foreach ($manufacturers as $manufacturer) {
+                    $selected = false;
+                    if ($link && $link['type'] == 'manufacturer' && $link['params']->id_manufacturer == $manufacturer['id_manufacturer']) {
+                        $selected = true;
+                    }
+                    $input .= '<option value="'.$manufacturer['id_manufacturer'].'"' . ( $selected ? 'selected="selected"' : '') . '>'.$manufacturer['name'].'</option>';
+                }
+                $input .= '</select>';
+                break;
+
+            case 'url':
+                $label = $this->l('URL:');
+                $input = '<input type="text" name="params[url]" id="url" value="' . (isset($link['params']->url) ? $link['params']->url : '') . '">';
+
+                break;
+
+            case 'hook':
+                $label = $this->l('Hook:');
+                $input = '<input type="text" name="params[hook]" id="hook" value="' . (isset($link['params']->hook) ? $link['params']->hook : '') . '">';
+
+                break;
+
+            case 'page':
 				$label = $this->l('Page:');
 				$input = '<select name="params[id_meta]" id="id_meta"><option value="">--</option>';
 				$metas = Meta::getMetas();
@@ -842,25 +1023,79 @@ class BlockEtdTopMenu extends Module {
 
 		if (!$this->isCached('blocketdtopmenu.tpl', $this->getCacheId())) {
 
-			require_once(dirname(__FILE__)."/lib/includes.php");
+            $conf = $this->getConfigValues();
 
-			$defaults = array(
-				'startLevel' => 0,
-				'endLevel' => 0,
-				'showAllChildren' => 1,
-				'theme' => 'etdprestashop'
-			);
-
-			$rnm = new RokNavMenu($defaults);
-			$rnm->initialize();
-
-			$this->smarty->assign('menu', $rnm);
+			$this->smarty->assign('tagId', $conf['ETDTOPMENU_TAGID']);
+			$this->smarty->assign('tagClass', $conf['ETDTOPMENU_TAGCLASS']);
+			$this->smarty->assign('list', BlockEtdTopMenuModel::getList());
+			$this->smarty->assign('item_tpl', $this->getTemplatePath('blocketdtopmenu_item.tpl'));
 
 		}
 
-		$html = $this->display(__FILE__, 'blocketdtopmenu.tpl', $this->getCacheId());
-		return $html;
+		return $this->display(__FILE__, 'blocketdtopmenu.tpl', $this->getCacheId());
 
 	}
+
+    protected function getConfigValues() {
+
+        $ret = array();
+
+        foreach ($this->getConfigFields() as $field) {
+            $ret[$field] = Tools::getValue($field, Configuration::getGlobalValue($field));
+        }
+
+        return $ret;
+    }
+
+    protected function getConfigFields() {
+
+        return array(
+            'ETDTOPMENU_TAGCLASS',
+            'ETDTOPMENU_TAGID'
+        );
+
+    }
+
+    /**
+     * Get realpath of a template of current module (check if template is overriden too)
+     *
+     * @since 1.5.0
+     * @param string $template
+     * @return string
+     */
+    public function getTemplatePath($template)
+    {
+        $overloaded = $this->_isTemplateOverloaded($template);
+        if ($overloaded === null)
+            return null;
+
+        if ($overloaded)
+            return $overloaded;
+        elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/hook/'.$template))
+            return _PS_MODULE_DIR_.'blocketdtopmenu/views/templates/hook/'.$template;
+        elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/front/'.$template))
+            return _PS_MODULE_DIR_.'blocketdtopmenu/views/templates/front/'.$template;
+        elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/'.$template))
+            return _PS_MODULE_DIR_.'blocketdtopmenu/'.$template;
+        else
+            return null;
+    }
+
+    public function _isTemplateOverloaded($template)
+    {
+        if (Tools::file_exists_cache(_PS_THEME_DIR_.'modules/blocketdtopmenu/'.$template))
+            return _PS_THEME_DIR_.'modules/blocketdtopmenu/'.$template;
+        elseif (Tools::file_exists_cache(_PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/hook/'.$template))
+            return _PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/hook/'.$template;
+        elseif (Tools::file_exists_cache(_PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/front/'.$template))
+            return _PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/front/'.$template;
+        elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/hook/'.$template))
+            return false;
+        elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/front/'.$template))
+            return false;
+        elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/'.$template))
+            return false;
+        return null;
+    }
 
 }

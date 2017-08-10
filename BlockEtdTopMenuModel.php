@@ -2,9 +2,9 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     1.0.1
- * @copyright   Copyright (C) 2014 Jean-Baptiste Alleaume. Tous droits réservés.
- * @license     http://alleau.me/LICENSE
+ * @version     2.1
+ * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
+ * @license     https://raw.githubusercontent.com/jbanety/blocketdcustom/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
  */
 
@@ -213,7 +213,7 @@ class BlockEtdTopMenuModel extends ObjectModel {
 			}
 
 			$sql = "UPDATE `" . _DB_PREFIX_ . "etd_topmenu` SET `type` = '".$db->escape($link['type'])."', `parent_id` = " . (int) $parent_id . ", `level` = " . (int) $level . ",
-					`browserNav` = " . (int) $link['browserNav'] . ", `access` = ". (int) $link['access'] . ", `columns` = ". (int) $link['columns'] . ", `distribution` = '" . $db->escape($link['distribution']) . "', `manual_distribution` = '" . $db->escape($link['manual_distribution']) . "', `width` = " . (int) $link['width'] . ", `column_widths` = '" . $db->escape($link['column_widths']) . "', `children_group` = " . (int) $link['children_group'] . ", `children_type` = '" . $db->escape($link['children_type']) . "', `modules` = " . (int) $link['modules'] . ", `module_hooks` = " . (int) $link['module_hooks'] . ", `css` = '" . $db->escape($link['css']) . "', `params` = '" . $db->escape($link['params']) . "', `lft` = " . (int) $lft . ", `rgt` = " . (int) $rgt . " WHERE `id` = " . (int) $link['id'];
+					`browserNav` = " . (int) $link['browserNav'] . ", `access` = ". (int) $link['access'] . ", `image` = '" . $db->escape($link['image']) . "', `css` = '" . $db->escape($link['css']) . "', `params` = '" . $db->escape($link['params']) . "', `lft` = " . (int) $lft . ", `rgt` = " . (int) $rgt . " WHERE `id` = " . (int) $link['id'];
 
 			$db->execute($sql);
 
@@ -277,8 +277,8 @@ class BlockEtdTopMenuModel extends ObjectModel {
 				return false;
 			}
 
-			$sql = "INSERT INTO `" . _DB_PREFIX_ . "etd_topmenu` (`type`, `parent_id`, `level`, `browserNav`, `access`, `columns`, `distribution`, `manual_distribution`, `width`, `column_widths`, `children_group`, `children_type`, `modules`, `module_hooks`, `css`, `params`, `lft`, `rgt`)
-					VALUES ('".$db->escape($link['type'])."', " . (int) $parent_id . ", " . (int) $level . ", " . (int) $link['browserNav'] . ", ". (int) $link['access'] . ", ". (int) $link['columns'] . ", '" . $db->escape($link['distribution']) . "', '" . $db->escape($link['manual_distribution']) . "', " . (int) $link['width'] . ", '" . $db->escape($link['column_widths']) . "', " . (int) $link['children_group'] . ", '" . $db->escape($link['children_type']) . "', " . (int) $link['modules'] . ", " . (int) $link['module_hooks'] . ", '" . $db->escape($link['css']) . "', '" . $db->escape($link['params']) . "', " . (int) $lft . ", " . (int) $rgt . ")";
+			$sql = "INSERT INTO `" . _DB_PREFIX_ . "etd_topmenu` (`type`, `parent_id`, `level`, `browserNav`, `access`, `image`, `css`, `params`, `lft`, `rgt`)
+					VALUES ('".$db->escape($link['type'])."', " . (int) $parent_id . ", " . (int) $level . ", " . (int) $link['browserNav'] . ", ". (int) $link['access'] . ", '". $db->escape($link['image']) . "', '" . $db->escape($link['css']) . "', '" . $db->escape($link['params']) . "', " . (int) $lft . ", " . (int) $rgt . ")";
 			$db->execute($sql);
 			$id_link = $db->Insert_ID();
 		}
@@ -620,6 +620,83 @@ class BlockEtdTopMenuModel extends ObjectModel {
 		return $row;
 	}
 
+	public static function getList() {
+
+        $context = Context::getContext();
+        $cache   = CacheCore::getInstance();
+
+        $key = 'blocketdtopmenumodel_getList_' . $context->language->id . "_" . $context->shop->id;
+
+        if (false && $cache->exists($key)) {
+
+            $items = $cache->get($key);
+
+        } else {
+
+            $items          = self::getLinks(false, true, $context->language->id, $context->shop->id);
+            $hidden_parents = [];
+            $lastitem       = 0;
+            $parents        = [];
+
+            if ($items) {
+
+                foreach ($items as $i => &$item) {
+
+                    $item['parent'] = false;
+
+                    if (isset($item['params'])) {
+                        $item['params'] = json_decode($item['params']);
+                    }
+
+                    if (isset($items[$lastitem]) && $items[$lastitem]['id'] == $item['parent_id']/* && $item->params->get('menu_show', 1) == 1*/) {
+                        $items[$lastitem]['parent'] = true;
+                        if (!isset($parents[$item['parent_id']])) {
+                            $parents[$item['parent_id']] = &$items[$lastitem];
+                        }
+                    }
+
+                    // Exclude item with menu item option set to exclude from menu modules
+                    if (/*($item->params->get('menu_show', 1) == 0) ||*/ in_array($item['parent_id'], $hidden_parents)) {
+                        $hidden_parents[] = $item['id'];
+                        unset($items[$i]);
+                        continue;
+                    }
+
+                    $item['deeper']     = false;
+                    $item['shallower']  = false;
+                    $item['level_diff'] = 0;
+                    $item['children']   = 0;
+
+                    if (isset($items[$lastitem])) {
+                        $items[$lastitem]['deeper']     = ($item['level'] > $items[$lastitem]['level']);
+                        $items[$lastitem]['shallower']  = ($item['level'] < $items[$lastitem]['level']);
+                        $items[$lastitem]['level_diff'] = ($items[$lastitem]['level'] - $item['level']);
+                    }
+                    
+                    if (isset($parents[$item['parent_id']])) {
+                        $parents[$item['parent_id']]['children']++;
+                    }
+
+                    $lastitem       = $i;
+                    $item['active'] = false;
+
+                }
+
+                if (isset($items[$lastitem])) {
+                    $items[$lastitem]['deeper']     = (1 > $items[$lastitem]['level']);
+                    $items[$lastitem]['shallower']  = (1 < $items[$lastitem]['level']);
+                    $items[$lastitem]['level_diff'] = ($items[$lastitem]['level'] - 1);
+                }
+            }
+
+            $cache->set($key, $items);
+
+        }
+
+        return $items;
+
+    }
+
 	protected static function _getTreeRepositionData($referenceNode, $nodeWidth, $position = 'before') {
 
 		// Make sure the reference an object with a left and right id.
@@ -682,7 +759,7 @@ class BlockEtdTopMenuModel extends ObjectModel {
 		return $data;
 	}
 
-    protected static function cleanCache($template, $cache_id = null, $compile_id = null) {
+    public static function cleanCache($template = null, $cache_id = null, $compile_id = null) {
 
         // On vide le cache Prestashop.
         $cache = Cache::getInstance();
@@ -691,7 +768,7 @@ class BlockEtdTopMenuModel extends ObjectModel {
         // On vide le cache smarty.
         //Tools::clearSmartyCache();
 
-		if (Configuration::get('PS_SMARTY_CLEAR_CACHE') == 'never')
+		if (Configuration::get('PS_SMARTY_CLEAR_CACHE') == 'never' || !isset($template))
 			return 0;
 
 		if ($cache_id === null)
@@ -704,47 +781,5 @@ class BlockEtdTopMenuModel extends ObjectModel {
 		return $number_of_template_cleared;
 
     }
-
-	/**
-	 * Get realpath of a template of current module (check if template is overriden too)
-	 *
-	 * @since 1.5.0
-	 * @param string $template
-	 * @return string
-	 */
-	protected static function getTemplatePath($template)
-	{
-		$overloaded = self::_isTemplateOverloadedStatic($template);
-		if ($overloaded === null)
-			return null;
-
-		if ($overloaded)
-			return $overloaded;
-		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/hook/'.$template))
-			return _PS_MODULE_DIR_.'blocketdtopmenu/views/templates/hook/'.$template;
-		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/front/'.$template))
-			return _PS_MODULE_DIR_.'blocketdtopmenu/views/templates/front/'.$template;
-		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/'.$template))
-			return _PS_MODULE_DIR_.'blocketdtopmenu/'.$template;
-		else
-			return null;
-	}
-
-	protected static function _isTemplateOverloadedStatic($template)
-	{
-		if (Tools::file_exists_cache(_PS_THEME_DIR_.'modules/blocketdtopmenu/'.$template))
-			return _PS_THEME_DIR_.'modules/blocketdtopmenu/'.$template;
-		elseif (Tools::file_exists_cache(_PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/hook/'.$template))
-			return _PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/hook/'.$template;
-		elseif (Tools::file_exists_cache(_PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/front/'.$template))
-			return _PS_THEME_DIR_.'modules/blocketdtopmenu/views/templates/front/'.$template;
-		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/hook/'.$template))
-			return false;
-		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/views/templates/front/'.$template))
-			return false;
-		elseif (Tools::file_exists_cache(_PS_MODULE_DIR_.'blocketdtopmenu/'.$template))
-			return false;
-		return null;
-	}
 
 }
