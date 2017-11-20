@@ -2,7 +2,7 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     2.1
+ * @version     2.2.0
  * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
  * @license     https://raw.githubusercontent.com/jbanety/blocketdcustom/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
@@ -642,6 +642,38 @@ class BlockEtdTopMenuModel extends ObjectModel {
 
                 foreach ($items as $i => &$item) {
 
+	                // Get the params.
+	                $iParams = (is_object($item['params'])) ? $item['params'] : json_decode($item['params']);
+	                switch ($item['type']) {
+		                case 'page':
+			                $meta = new MetaCore($iParams->id_meta, $context->language->id);
+			                $item['link'] = $context->link->getPageLink($meta->page, false, $context->language->id);
+			                break;
+		                case 'pcategory':
+			                $cat = new Category($iParams->id_category, $context->language->id);
+			                $item['link'] = $context->link->getCategoryLink($cat->id_category, $cat->link_rewrite);
+			                break;
+		                case 'product':
+
+			                break;
+		                case 'cms':
+			                $cms = new CMS($iParams->id_cms, $context->language->id);
+			                $item['link'] = $context->link->getCMSLink($cms);
+			                break;
+		                case 'ccategory':
+			                $cat = new CMSCategory($iParams->id_cms_category, $context->language->id);
+			                $item['link'] = $context->link->getCMSCategoryLink($cat);
+			                break;
+		                case 'supplier':
+
+			                break;
+		                case 'manufacturer':
+
+			                break;
+		                default :
+			                break;
+	                }
+
                     $item['parent'] = false;
 
                     if (isset($item['params'])) {
@@ -656,7 +688,7 @@ class BlockEtdTopMenuModel extends ObjectModel {
                     }
 
                     // Exclude item with menu item option set to exclude from menu modules
-                    if (/*($item->params->get('menu_show', 1) == 0) ||*/ in_array($item['parent_id'], $hidden_parents)) {
+                    if (in_array($item['parent_id'], $hidden_parents)) {
                         $hidden_parents[] = $item['id'];
                         unset($items[$i]);
                         continue;

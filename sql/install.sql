@@ -1,4 +1,4 @@
-CREATE TABLE `a2e1_etd_topmenu` (
+CREATE TABLE `#__etd_topmenu` (
   `id` int(11) NOT NULL,
   `type` varchar(16) NOT NULL COMMENT 'The type of link: Component, URL, Alias, Separator',
   `parent_id` int(10) UNSIGNED NOT NULL DEFAULT '1' COMMENT 'The parent menu item in the menu tree.',

@@ -2,7 +2,7 @@
 /**
  * @package     blocketdtopmenu
  *
- * @version     2.1
+ * @version     2.2.0
  * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
  * @license     https://raw.githubusercontent.com/jbanety/blocketdcustom/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
@@ -19,7 +19,7 @@ class BlockEtdTopMenu extends Module {
 
 		$this->name = 'blocketdtopmenu';
 		$this->tab = 'front_office_features';
-		$this->version = '2.1';
+		$this->version = '2.2.0';
 		$this->author = 'ETD Solutions';
 
 		$this->bootstrap = true;
@@ -231,6 +231,10 @@ class BlockEtdTopMenu extends Module {
 							array(
 								'id' => 'separator',
 								'name' => $this->l('Separator')
+							),
+							array(
+								'id' => 'heading',
+								'name' => $this->l('Heading')
 							),
 							array(
 								'id' => 'page',
@@ -618,7 +622,7 @@ class BlockEtdTopMenu extends Module {
 		if (Tools::isSubmit('submitLink')) {
 
 			$type = Tools::getValue('type');
-			if (!in_array($type, array('separator','page','pcategory','product','cms','ccategory','supplier','manufacturer','module','url','hook'))) {
+			if (!in_array($type, array('separator','heading','page','pcategory','product','cms','ccategory','supplier','manufacturer','module','url','hook'))) {
 				$this->_errors[] = $this->l('Please choose a valid type.');
 			}
 
@@ -825,6 +829,7 @@ class BlockEtdTopMenu extends Module {
 		switch($type) {
 
 			case 'separator':
+			case 'heading':
 				return array(
 					'hasError' => false,
 					'msg' => '',

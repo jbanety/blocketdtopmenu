@@ -1,12 +1,13 @@
 {**
  * @package     blocketdtopmenu
  *
- * @version     2.1
+ * @version     2.2.0
  * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
  * @license     https://raw.githubusercontent.com/jbanety/blocketdcustom/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
  *}
-<!--[ETDHOOK:NAVIGATION]-->
+{strip}
+{addScript src=$modules_dir|cat:"blocketdtopmenu/js/menu.js"}
 {$breakCount = []}
 {$count = []}
 {$currentCol = []}
@@ -15,7 +16,12 @@
 {$id = ''}
 {if $tagId|strlen > 0}
     {$id = ' id="'|cat:$tagId|cat:'"'}
+{addScriptDeclaration content="jQuery(document).ready(function() {ldelim}
+    \$('#$tagId').etdtopmenu();
+{rdelim});"}
 {/if}
+{/strip}
+<!--[ETDHOOK:NAVIGATION]-->
 <nav class="navbar{if $tagClass|strlen > 0} {$tagClass}{/if}"{$id}>
     <div class="container">
         <div class="row">
@@ -33,6 +39,9 @@
 
     {if $item.children > 0 && $item.params->columns > 1}
         {$breakCount[$item.level+1] = floor($item.children / $item.params->columns)}
+        {if $breakCount[$item.level+1] == 0 && $item.children / $item.params->columns > 0}
+            {$breakCount[$item.level+1] = 1}
+        {/if}
         {$groupChildren[$item.level+1] = $item.params->group_child_items}
         {$count[$item.level+1] = 0}
         {$currentCol[$item.level+1] = 0}
@@ -71,7 +80,7 @@
                     <div class="subnavbar">
                         <div class="container">
                     {/if}
-                        <ul{$ulClass}>{if $ulClass|strlen }{/if}
+                        <ul{$ulClass}>
                             <li class="subnavbar-close visible-xs visible-sm"><a href="#">{l s='Close'} <span class="fa fa-chevron-circle-left"></span></a></li>
                 {elseif $item.shallower}
                     </li>
@@ -83,7 +92,7 @@
                                 </ul>
                                 {if $item.level - $j == 2}
                 </div></div>
-            {/if}
+                                 {/if}
                             {/if}
                             {$breakCount[$item.level - $j] = 0}
                             {$groupChildren[$item.level - $j] = 0}

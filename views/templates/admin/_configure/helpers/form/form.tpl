@@ -1,7 +1,7 @@
 {**
  * @package     blocketdtopmenu
  *
- * @version     2.1
+ * @version     2.2.0
  * @copyright   Copyright (C) 2017 ETD Solutions. Tous droits réservés.
  * @license     https://raw.githubusercontent.com/jbanety/blocketdcustom/master/LICENSE
  * @author      Jean-Baptiste Alleaume http://alleau.me
@@ -169,6 +169,8 @@
 									{l s='Module'}
 								{elseif $link.type == 'separator'}
 									{l s='Separator'}
+								{elseif $link.type == 'heading'}
+									{l s='Heading'}
 								{else}
 									{l s='Unknown'}
 								{/if}
